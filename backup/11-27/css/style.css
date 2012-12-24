@@ -1,0 +1,55 @@
+/*override the header,footer,content layout style of jquery to 
+support the fixed header and footer.The scrollable viewport is content area*/
+.cs-header {
+	height : 42px;
+	position : absolute;
+	width : 100% ;
+	z-index : 2
+}
+.cs-content {
+	top : 42px;
+	bottom : 42px;
+	padding : 0;
+	position : absolute;
+	width : 100% ;
+	overflow : auto;
+}
+.cs-wrapper {
+	top : 0px;
+	bottom : 0px;
+	padding : 0;
+	position : absolute;
+	width : 100% ;
+	overflow : hidden;
+}
+.cs-scroller {
+	position : absolute;
+	-webkit-tap-highlight-color : rgba(0, 0, 0, 0);
+	width : 100% ;
+	padding : 0;
+}
+.cs-footer {
+	height : 42px;
+	position : absolute;
+	width : 100% ;
+	bottom : 0;
+	z-index : 2
+}
+
+/*home page style*/
+.cs-icons{
+	text-align: center;
+}
+.cs-icons a{
+	text-decoration:none;
+	text-align: center;
+}
+.cs-icons div{
+	width:128px;
+	height:128px;
+	margin:4px;
+	line-height: 128px;
+	float: left;
+	position:relative;
+	background: rgb(248,146,50);
+}

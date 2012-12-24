@@ -1,0 +1,41 @@
+﻿<html>
+<head>
+    <title>News</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="css/jquery.mobile-1.2.0.css" />
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="js/cordova.js"></script>
+    <script src="js/jquery.js"></script>
+    <script src="js/iscroll.js" type="text/javascript"></script>
+    <script src="js/init.js" charset="UTF-8"></script>
+    <script src="js/jquery.mobile-1.2.0.js"></script>
+</head>
+<body>
+    <div id="news_page" data-title="News" data-role="page">
+        <div id="news_content" class="cs-wrapper" data-role="content">
+            <div id="news_scroller" class="cs-scroller">
+                <div id="news_pullDown" class="cs-pull-down">
+                    <span class="cs-pull-down-icon"></span>
+                    <span class="cs-pull-down-lb">Pull down to refresh...</span>
+                </div>
+                <div class="content-primary" style=" -webkit-transform: translate3d(0,0,0); ">
+                    <ul id="news_ul" data-role="listview" class="cs-listview"></ul>
+                </div>
+                <div id="news_pullUp" class="cs-pull-up">
+                    <span class="cs-pull-up-icon"></span>
+                    <span class="cs-pull-up-lb">Pull up to refresh...</span>
+                </div>
+            </div>
+        </div>
+        <div data-role="popup" id="news_pop" >
+            <div data-role="header" data-theme="a" data-backbtn="false" class="ui-corner-top">
+                <h1>Error</h1>
+            </div>
+            <div data-role="content"  data-theme="d" class="ui-corner-bottom ui-content">
+                <div id="news_error"></div>
+                <a href="#" data-role="button" data-rel="back" data-inline="true" data-theme="c">确定</a>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

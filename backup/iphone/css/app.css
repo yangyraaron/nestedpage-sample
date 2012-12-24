@@ -1,0 +1,296 @@
+/* public css */
+body{
+  margin: 0px;
+  padding: 0px;
+}
+body {
+  -webkit-user-select: none;
+  -webkit-text-size-adjust:none;
+}
+
+a { text-decoration: none; }
+a:link {color: rgb(39,129,228) }     /* 未访问的链接 */
+a:visited {color: rgb(39,129,228) }  /* 已访问的链接 */
+a:hover {color: rgb(39,129,228) }    /* 当有鼠标悬停在链接上 */
+a:active {color: rgb(39,129,228) }   /* 被选择的链�? */
+
+
+
+/* index style */
+#header {
+  width: 100%;
+  height: 47px;
+  background: -webkit-linear-gradient(#FAFAFA,#EAEAEA);
+  border-bottom: 1px solid #CACACA;
+  -webkit-box-shadow: 0 1px 0 rgba(255,255,255,0.4),0 0 10px rgba(0,0,0,0.1);
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  left: 0;
+  color: black;
+  text-align: center;
+  font-size: 2em;
+  line-height: 47px;
+  font-weight: 900;
+}
+#back {
+  float: left;
+  font-size: 18px;
+  left: 20px;
+  position: absolute;
+  -webkit-box-shadow: 0px 0px 2px #333;
+  -webkit-border-radius: 8px;
+  padding-left: 24px;
+  padding-right: 24px;
+  background: -webkit-gradient(
+    linear,
+    left top,
+    left bottom,
+    color-stop(0.13, rgb(150 ,150 ,150 )),
+    color-stop(0.79, rgb(200,200,200))
+  ); 
+  line-height: 28px;
+  top: 8px;
+  color: white;
+  font-weight: 600;
+}
+
+
+/* wrapper part */
+#main {
+  width: 100%;
+}
+#wrapper {
+  width: 100%;
+  position: absolute; 
+  z-index: 1;
+  top: 47px; 
+  left: 0;
+  bottom: 48px;
+  overflow: auto;
+}
+#scroller {
+  position:absolute; 
+  z-index:1;
+/*  -webkit-touch-callout:none;*/
+  -webkit-tap-highlight-color:rgba(0,0,0,0);
+  width:100%;
+  padding:0;
+}
+#scroller ul{
+  list-style:none;
+  padding:0;
+  margin:0;
+  width:100%;
+}
+#scroller li{
+  width: 100%;
+  height: 340px;
+  border-bottom: 1px solid #ccc;
+  border-top: 1px solid #fff;
+  background-color: #fafafa;
+  font-size: 14px;
+  padding: 0px;
+  margin: 0px;
+  display: -webkit-box;
+  background: url('../images/mabu.png');
+}
+.index-scroller {
+  width: 80%!important;
+  top: 50%;
+  margin-top: -50%;
+  left: 50%;
+  margin-left: -40%;
+}
+#more {
+  width: 100%;
+  height: 47px;
+  border-bottom: 1px solid #ccc;
+  border-top: 1px solid #fff;
+  background-color: #fafafa;
+  font-size: 14px;
+  padding: 0px;
+  margin: 0px;
+  display: -webkit-box;
+  text-align: center;
+  line-height: 47px;
+}
+
+#footer {
+  position:absolute; z-index:2;
+  bottom:0; left:0;
+  width:100%;
+  height:48px;
+  background-color:#222;
+  background-image:-webkit-gradient(linear, 0 0, 0 100%, color-stop(0, #999), color-stop(0.02, #666), color-stop(1, #222));
+  background-image:-moz-linear-gradient(top, #999, #666 2%, #222);
+  background-image:-o-linear-gradient(top, #999, #666 2%, #222);
+  padding:0;
+  border-top:1px solid #444;
+}
+
+
+.s-icon {
+  width: 128px;
+  height: 128px;
+  background: url(../images/default-icon.png);
+  margin: 4px; 
+  float: left;
+}
+
+.s-icon-10 {
+  width: 400px;
+  height: 128px;
+  margin: 4px; 
+  float: left;
+  font-size: 2em;
+  font-weight: 600;
+  text-align: center;
+  line-height: 128px;
+  color: #333;
+  text-shadow: 1px 1px 2px  #999;
+}
+.s-icon-download {
+  width: 264px;
+  height: 128px;
+  margin: 4px; 
+  float: left;
+  cursor: pointer;
+  opacity: 0.8;
+}
+.icon-default {
+  background: url(../images/default-icon.png);
+}
+.s-icon-none {
+  width: 128px;
+  height: 128px;
+  margin: 4px; 
+  z-index: 3;
+  float: left;
+  position: relative;
+  pointer: cursor;
+  text-align: center;
+  color: white;
+  opacity: 0.8;
+}
+.s-icon-none p {
+  margin: 0px;
+  line-height: 128px;
+  font-size: 1em;
+}
+
+/* item list page */
+.item {
+  width: 240px;
+  height: 310px;
+  background: rgba(100,100,100,0.1);
+  -webkit-box-shadow: 0px 2px 3px #333;
+  -webkit-box-sizing:border-box;
+  margin: 8px;
+  -webkit-box-flex: 1;
+  -webkit-border-radius: 10px;
+  color: #666;
+  /*
+  float: left;
+  */
+}
+
+.item img {
+  width: 160px;
+  height: 51%; 
+  margin-top: 15px;
+  position: relative;
+  left: 50%;
+  margin-left: -80px;
+  background: black;
+  -webkit-box-shadow: 0px 0px 2px #333;
+}
+.item-des {
+  text-align: center;
+  color: #333;
+  font-weight: 600;
+  width: 180px;
+  height: 50px;
+  margin: auto auto;
+  margin-top: 10px;
+}
+.price {
+  margin-left: 20px;
+  font-size: 14px;
+  font-weight: 900;
+  color: #64A6FF;
+  text-shadow: 1px 1px 2px #999;
+}
+.like {
+  position: relative;
+  float: right;
+  margin-right: 20px;
+  font-size: 14px;
+  font-weight: 900;
+  color: #F75359;
+  text-shadow: 1px 1px 2px #999;
+}
+
+
+/* webview page */
+#webview {
+  width: 100%;
+  height: 100%;
+}
+
+
+/* loading animation */
+
+/**
+ *
+ * Pull down styles
+ *
+ */
+#pullDown, #pullUp {
+  background:#fff;
+  height:40px;
+  line-height:40px;
+  padding:5px 10px;
+  border-bottom:1px solid #ccc;
+  font-weight:bold;
+  font-size:14px;
+  color:#888;
+}
+#pullDown .pullDownIcon, #pullUp .pullUpIcon  {
+  display:block; float:left;
+  width:40px; height:40px;
+  background:url(../images/pull-icon.png) 0 0 no-repeat;
+  -webkit-background-size:40px 80px; background-size:40px 80px;
+  -webkit-transition-property:-webkit-transform;
+  -webkit-transition-duration:250ms;  
+}
+#pullDown .pullDownIcon {
+  -webkit-transform:rotate(0deg) translateZ(0);
+}
+#pullUp .pullUpIcon  {
+  -webkit-transform:rotate(-180deg) translateZ(0);
+}
+
+#pullDown.flip .pullDownIcon {
+  -webkit-transform:rotate(-180deg) translateZ(0);
+}
+
+#pullUp.flip .pullUpIcon {
+  -webkit-transform:rotate(0deg) translateZ(0);
+}
+
+#pullDown.loading .pullDownIcon, #pullUp.loading .pullUpIcon {
+  background-position:0 100%;
+  -webkit-transform:rotate(0deg) translateZ(0);
+  -webkit-transition-duration:0ms;
+
+  -webkit-animation-name:loading;
+  -webkit-animation-duration:2s;
+  -webkit-animation-iteration-count:infinite;
+  -webkit-animation-timing-function:linear;
+}
+
+@-webkit-keyframes loading {
+  from { -webkit-transform:rotate(0deg) translateZ(0); }
+  to { -webkit-transform:rotate(360deg) translateZ(0); }
+}
