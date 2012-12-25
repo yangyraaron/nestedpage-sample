@@ -38,10 +38,22 @@
 	})();
 
 	define('config',function (require,exports,module) {
+		var utility = require('mex/utility'),
+			platform = undefined;
+
+		if(utility.isAndroid()){
+				platform={android:'android'};
+			}else if(utility.isIDevice){
+				platform={ios:'ios'};
+			}else if(utility.isTouchPad){
+				platform={touch:'ouch pad'}
+		}
+
 		exports.jQuery = $;
 		exports.window = window;
 		exports.doc = document;
 		exports.logLevel = 'error';
+		exports.platform = platform;
 	});
 
 	define('mex',function(require,exports,module){
@@ -448,6 +460,15 @@
 		exports.isString=function (obj) {
 				return typeof obj === 'string';
 			};
+		exports.isAndroid = function(){
+			return (/android/gi).test(navigator.appVersion);
+		},
+		exports.isIDevice = function () {
+			return (/iphone|ipad/gi).test(navigator.appVersion);
+		},
+		exports.isTouchPad = function(){
+			return (/hp-tablet/gi).test(navigator.appVersion);
+		},
 		exports.loadImg = function (img,defaultUrl) {
 			var fullUrl = img.getAttribute('cs-src'),
 			baseUrl = img.getAttribute('cs-baseUrl'),
@@ -961,100 +982,108 @@
 						if(complete) complete();
 					});
 				},
-				prepare = function () {
-					//prepare from page
-					if(!none && $from){
-
-						//if the direction is reverse then start animation after from page initialization
-						if(reverse){
-							transitionComplete($from,already);
-						}
-
-						$from.css('-webkit-transform',createTransform('0%'));	
-						$from.css('-webkit-transition','-webkit-transform 250ms linear');
+				prePos = function(curValue){
+					var oldValue = $to[0].style.webkitTransform,
+						curValue = createTransform(curValue);
+					//because everytime animation completed the to page's transition,tranfrom property
+					//are reset to none,so here what we need to check is if the to page's position has
+					//be in place that animation need it to be,if it is then start anmiation when from page's
+					//inialization has completed,else start anmiation when to page initializaiton has completed
+					if(curValue == oldValue){
+					//if the direction is reverse then start animation after from page initialization
+						transitionComplete($from,already);
+					}else{
+						transitionComplete($to,already);
 					}
 
-					//prepare to page
+					$to.css('-webkit-transform',curValue);
+				},
+
+				prepare = function () {
+					//init to page,because of the javascript's one thread excuting,
+					//the key point of animation is to make sure that when animation is starting,
+					//everything that user can see have been already
 					$to.css( "z-index", -10 );
-					$to.height(mex.shell.getContentHeight());
 					$to.addClass( $.mobile.activePageClass);
-					$.mobile.focusPage( $to );
+					$to.css('opacity',0);
+					//$.mobile.focusPage( $to );
+					$to.height(mex.shell.getContentHeight());
 
+					//if the transition is indicated and has from page 
 					if(!none && $from){
-
-						if(!reverse){
-							var oldValue = $to[0].style.webkitTransform,
-								tValue = createTransform('100%');
-							//due to none of clearing the tranform style if the $to page is the
-							//$from page of last time transition,here need to check if the transform 
-							//is already ,if it is ,then excutes immediately. 
-							if(oldValue == tValue){
-								already();
-							}else{
-
-								//if the direction is not revrese,then start the animation after the to page initialization
-								transitionComplete($to,already);
-								$to.css('-webkit-transform',tValue);
-							}
-						}
-						else{
-							$to.css('-webkit-transform',createTransform('-100%'));
+						//because when the animation completed,from page's transition always will be changed
+						//so need to check if the animation starts when the from or page is aleady
+						//var oldValue = $to[0].style.webkitTransform;
+						if(reverse){
+							prePos('-100%')
+						}else{
+							prePos('100%');
 						}
 
-						$to.css('-webkit-transition','-webkit-transform 250ms linear');
+						$from.css('-webkit-transform',createTransform('0%'));
+						//go to already step as soon as possible
+						$from.css('-webkit-transition','-webkit-transform .1ms linear');
+
+						$to.css('-webkit-transition','-webkit-transform .1ms linear');
 					}
 					else{
-						startOut();
-
-						startIn();
+						already();
 					}
 						
 				},	
 				already = function () {
-						startOut();
-						startIn();
+					$to.css('opacity',1);
+					$to.css( 'z-index', '' );
+
+					if(!none && $from){
+						$from.css('-webkit-transition','-webkit-transform 250ms linear');
+
+						$to.css('-webkit-transition','-webkit-transform 250ms linear');
+					}
+					startOut();
+					startIn();
 				},
 				startOut = function() {
-						$to.css( "z-index", '1' );
-						if(none || !$from)
-							return;
+					//$to.css( "z-index", '1' );
+					if(none || !$from)
+						return;
 
-						if(reverse){
-							$from.css('-webkit-transform',createTransform('100%'));
-						}else{
-							$from.css('-webkit-transform',createTransform('-100%'));	
-						}
+					if(reverse){
+						$from.css('-webkit-transform',createTransform('100%'));
+					}else{
+						$from.css('-webkit-transform',createTransform('-100%'));	
+					}
 				},
 
 				cleanFrom = function() {
-					$from.removeClass( $.mobile.activePageClass);//.height( '' );	
+					$from.removeClass( $.mobile.activePageClass);//.height( '' );
+					$from.css('-webkit-transition','none');	
 				},
 
 				startIn = function() {
 
-						if ( !none ) {
-							transitionComplete($to,doneIn);
-						}
+					if ( !none ) {
+						transitionComplete($to,doneIn);
+					}
 
-						if(!none && $from){
-							$to.css('-webkit-transform',createTransform('0%'));
-						}
+					if(!none && $from){
+						$to.css('-webkit-transform',createTransform('0%'));
+					}
 
-						if ( none ) {
-							doneIn();
-						}
+					if ( none ) {
+						doneIn();
+					}
 
 				},
 
 				doneIn = function() {
-						if(!none && $from)
-							cleanFrom();
+					if(!none && $from)
+						cleanFrom();
 
-						$to.css('-webkit-transform','none');
-						$to.css('-webkit-transition','none');
+					$to.css('-webkit-transform','none');
+					$to.css('-webkit-transition','none');
 
-
-						deferred.resolve( name, reverse, $to, $from, true );
+					deferred.resolve( name, reverse, $to, $from, true );
 				};
 
 			if (window.WebKitCSSMatrix){
@@ -1217,7 +1246,7 @@
 
 								$this._render(news);
 							
-								if (device.isReady) {
+								if (device.isReady && options.caching) {
 									var db = database.getdb("news");
 
 									logger.logInfo('get news db:',db);
@@ -1368,9 +1397,13 @@
 				pullUpOffset = pullUpEl.length ? pullUpEl[0].offsetHeight : 0;
 
 				self.topOffset=pullDownOffset;
-				
+
+				var useTransform = config.platform.android? true:false;
+
+				logger.logInfo('the platform is:',config.platform,'iscorll use transform:'+useTransform);
+
 				self.scroller = new iScroll('news_content', {
-						useTransform : true,
+						useTransform : useTransform,
 						topOffset : pullDownOffset,
 						onRefresh : function () {
 							if (pullDownEl.hasClass('cs-pull-down-loading')) {
@@ -1468,7 +1501,7 @@
 					createScroller();
 				}
 
-				self.scroller.scrollTo(0,self.topOffset,0,null);
+				//self.scroller.scrollTo(0,self.topOffset,0,null);
 			}
 
 			var initNews = function () {
@@ -1481,13 +1514,13 @@
 							codeType : codeType
 						},
 						linkUrl : "detail.html",
-						dataType : "jsonp",
-						error:function (state,error) {
-							$('#news_error').html("state:"+state+"</br>Error:"+error);
-							$('#news_pop').popup('open');
+						dataType : "jsonp"
+						// error:function (state,error) {
+						// 	$('#news_error').html("state:"+state+"</br>Error:"+error);
+						// 	$('#news_pop').popup('open');
 
-							mex.shell.hideLoading();
-						}
+						// 	mex.shell.hideLoading();
+						// }
 					});
 				
 				self.grid = grid;
@@ -1573,7 +1606,7 @@
 					//pop.popup();
 
 					img.bind('load',function () {
-						pop.css('display','block');
+						pop.css('display','');
 
 						pop.popup('open',{positionTo:$('#detail_content'),transition:'pop'});
 					});
@@ -1604,10 +1637,6 @@
 
 							logger.logInfo('data:',data);	
 
-							// $('#detail_inner').append("<div id='detail_pop' data-role='popup' data-corners='false'>"+
-       //              			"<a href='#' data-rel='back' data-role='button' data-theme='a' data-icon='delete' "+
-       //              			"data-iconpos='notext' class='ui-btn-left'>Close</a></div>");
-
 							if(imgs&&imgs.length){
 								var imgsContainer = $('<div></div>');
 
@@ -1631,8 +1660,11 @@
 							if(news){
 								content.append(news.content);
 							}
+							var useTransform = config.platform.android?true:false
 
-							self.scroller = new iScroll('detail_content');
+							logger.logInfo('the platform is:',config.platform,'iscorll use transform:'+useTransform);
+
+							self.scroller = new iScroll('detail_content',{useTransform : useTransform});
 						}});
 				}
 
@@ -1641,6 +1673,11 @@
 						$(this).find('img').remove();
 					}
 				});
+			});
+
+			$('#detail_page').live('pageremove',function(e){
+				self.scroller.destroy();
+				self.scroller = null;
 			});
 
 		};
