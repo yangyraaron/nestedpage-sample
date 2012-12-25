@@ -1213,7 +1213,9 @@
 							
 							var item = $("<li><a href='" + this.options.linkUrl + "'>"+
 										"<img class='cs-img' style='margin:1em 10px;' width='80px' height='60px' cs-baseUrl='"+baseUrl+"' cs-url='"+imgUrl+"' />"+
-										"<h6>" + newItem.titleNews + "</h6><p>"+newItem.descNews+"</p><p>" + newItem.from + "<span style='float:right'>"+newItem.time+"</span></p></a></li>");
+										"<h6>" + newItem.titleNews + "</h6><p>"+newItem.descNews+"</p>"+
+										"<div style='display:inline;'><p style='max-width:120px;text-overflow:ellipsis;float:left;'>" + newItem.from + 
+										"</p><p style='float:right'>"+newItem.time+"</p></div></a></li>");
 
 							var img = item.find('img');
 							utility.loadImg(img[0],dPath);
