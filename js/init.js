@@ -52,7 +52,7 @@
 		exports.jQuery = $;
 		exports.window = window;
 		exports.doc = document;
-		exports.logLevel = 'error';
+		exports.logLevel = 'info';
 		exports.platform = platform;
 	});
 
@@ -645,16 +645,16 @@
 				}
 			},
 			_create : function () {
-				var pageHtml = "<div id='shell_page' data-role='page'></div>",
+				var pageHtml = "<div id='shell_page' style='overflow:hidden;' data-role='page'></div>",
 				origin = $(this._originalHtml);
 				
 				this.firstPage.page = origin;
 				
-				$(doc.body).append(pageHtml);
+				$(doc.body).append(pageHtml).css('overflow','hidden');
 				$("#shell_page").append(this._header())
 				.append("<div id='shell_content' data-role='content' class='cs-content' style='padding:0' ></div>");
 				
-				$("#shell_content").append(origin);
+				$("#shell_content").append(origin).css('overflow','hidden');
 				$("#shell_page").append(this._footer());
 				
 				var $this = this;
@@ -664,6 +664,7 @@
 						id = target.id,
 						firstPage = $this.firstPage.page;
 					
+					$(target).css('overflow','hidden');
 					//because the first nested page can not update the history ,if the page is the first nested page ,then replace the url
 					if (id !== "shell_page") {
 						return;
@@ -722,23 +723,33 @@
 					});
 				});
 				
-				$(window).bind('orientationchange', function (e) {
-					var page = $('#shell_content').find('.ui-page-active');
-					
-					if (page.length) {
-						//because on andriod the height updating is later then
-						//orientationchange,so we delay the height resetting,and becasue
-						//the iscroll refreshes 200s after orientationchange,to make sure
-						//the iscroll could get the updated height,set 100s delay
-						setTimeout(function () {
-							var height = $this.getContentHeight();
-							
-							page.css('min-height', height)
-							.css('max-height', height);
-							$('#shell_content').css('max-height', height);
-						}, 100);
-					}
+				$(window).bind('resize',function(e){
+					logger.logInfo('resizing:');
+
+					$this._onresize();
 				});
+
+				$(window).bind('orientationchange', function (e) {
+					$this._onresize();
+				});
+			},
+			_onresize:function(){
+				var page = $('#shell_content').find('.ui-page-active'),
+					$this = this;
+				
+				if (page.length) {
+					//because on andriod the height updating is later then
+					//orientationchange,so we delay the height resetting,and becasue
+					//the iscroll refreshes 200s after orientationchange,to make sure
+					//the iscroll could get the updated height,set 180s delay
+					setTimeout(function () {
+						var height = $this.getContentHeight();
+						
+						page.css('min-height', height)
+						.css('max-height', height);
+						$('#shell_content').css('max-height', height);
+					}, 180);
+				}
 			},
 			_data : {},
 			firstPage : {
@@ -1036,9 +1047,9 @@
 					$to.css( 'z-index', '' );
 
 					if(!none && $from){
-						$from.css('-webkit-transition','-webkit-transform 250ms linear');
+						$from.css('-webkit-transition','-webkit-transform 350ms ease-out');
 
-						$to.css('-webkit-transition','-webkit-transform 250ms linear');
+						$to.css('-webkit-transition','-webkit-transform 350ms ease-out');
 					}
 					startOut();
 					startIn();
@@ -1192,11 +1203,22 @@
 							grid.empty();
 
 						function itemclick (item,grid,data) {
-							item.click(function () {
+							// item.click(function () {
+							// 	var old = $this.selectedItem.item;
+							// 	if(old){
+							// 		old.removeClass('ui-btn-active');
+							// 	}
+							// 	item.addClass('ui-btn-active');
+
+							// 	$this.selectedItem.item = item;
+							// 	$this.selectedItem.data = data;
+							// });
+							item.bind('tap',function(){
 								var old = $this.selectedItem.item;
 								if(old){
 									old.removeClass('ui-btn-active');
 								}
+								item.addClass('ui-btn-active');
 
 								$this.selectedItem.item = item;
 								$this.selectedItem.data = data;
@@ -1214,7 +1236,7 @@
 							var item = $("<li><a href='" + this.options.linkUrl + "'>"+
 										"<img class='cs-img' style='margin:1em 10px;' width='80px' height='60px' cs-baseUrl='"+baseUrl+"' cs-url='"+imgUrl+"' />"+
 										"<h6>" + newItem.titleNews + "</h6><p>"+newItem.descNews+"</p>"+
-										"<div style='display:inline;'><p style='max-width:120px;text-overflow:ellipsis;float:left;'>" + newItem.from + 
+										"<div style='display:inline;'><p style='max-width:100px;text-overflow:ellipsis;float:left;'>" + newItem.from + 
 										"</p><p style='float:right'>"+newItem.time+"</p></div></a></li>");
 
 							var img = item.find('img');
@@ -1673,13 +1695,16 @@
 				$('#detail_pop').bind({
 					popupafterclose:function (e,ui) {
 						$(this).find('img').remove();
+						$(this).css('display','none');
 					}
 				});
 			});
-
+	
 			$('#detail_page').live('pageremove',function(e){
-				self.scroller.destroy();
-				self.scroller = null;
+				if(self.scroller){
+					self.scroller.destroy();
+					self.scroller = null;
+				}
 			});
 
 		};
