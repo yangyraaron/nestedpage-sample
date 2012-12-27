@@ -447,28 +447,28 @@
 					getValue : getValue,
 					setValue : setValue
 				};
-			};
+		};
 		exports.isObject=function(obj){
 				return typeof obj === 'object';
-			};
+		};
 		exports.isFunction=function(obj){
 				return typeof obj === 'function';
-			};
+		};
 		exports.isArray=function (obj) {
 				return obj instanceof Array && obj['push'] != undefined;
-			};
+		};
 		exports.isString=function (obj) {
 				return typeof obj === 'string';
-			};
+		};
 		exports.isAndroid = function(){
 			return (/android/gi).test(navigator.appVersion);
-		},
+		};
 		exports.isIDevice = function () {
 			return (/iphone|ipad/gi).test(navigator.appVersion);
-		},
+		};
 		exports.isTouchPad = function(){
 			return (/hp-tablet/gi).test(navigator.appVersion);
-		},
+		};
 		exports.loadImg = function (img,defaultUrl) {
 			var fullUrl = img.getAttribute('cs-src'),
 			baseUrl = img.getAttribute('cs-baseUrl'),
@@ -503,7 +503,58 @@
 
 			img.src = defaultUrl;
 
+		};
+		exports.createTimeTracker = function(){
+			var timeTracker = function(){
+				this._timeSlices = [];
 			};
+
+			timeTracker.prototype = {
+				_getSlice: function(){
+					var date = new Date();
+					var curSlice = {minute:date.getMinutes(),
+						second:date.getSeconds(),
+						millisecond:date.getMilliseconds()};
+					return curSlice;
+				},
+				_state:0,
+				start:function(){
+					this._state = 1;
+
+					var date = new Date(),
+						curSlice = this._getSlice();
+
+					this._timeSlices.push(curSlice);
+				},
+				getInterval:function(){
+					if(!this._state)
+						return undefined;
+
+					var curSlice = this._getSlice();
+
+					var interval = undefined;
+
+					if(this._timeSlices.length){
+						var lastSlice = this._timeSlices.pop();
+						interval = {
+							minute:curSlice.minute-lastSlice.minute,
+							second:curSlice.second-lastSlice.second,
+							millisecond:curSlice.millisecond-lastSlice.millisecond
+						};
+					}
+
+					this._timeSlices.push(curSlice);
+
+					return interval;
+				},
+				finish:function(){
+					this._timeSlices = [];
+					this._state = 0;
+				}
+			};
+
+			return new timeTracker();
+		};
 	});
 	
 	define('mex/log',function (require,exports,module) {
@@ -724,7 +775,7 @@
 				});
 				
 				$(window).bind('resize',function(e){
-					logger.logInfo('resizing:');
+					//logger.logInfo('resizing:');
 
 					$this._onresize();
 				});
@@ -829,6 +880,8 @@
 				
 				var navClick = function (el, nav) {
 					el.click(function () {
+						$this.curNav = nav;
+
 						var firstPage = $this.firstPage.page;
 						//if the activepage is shell_page means that it is first load
 						var fromPage = ($.mobile.activePage.length &&
@@ -869,8 +922,7 @@
 							fn(nav);
 						}
 						
-						$this.curNav = nav;
-						$this.setTitle(nav.title);
+						//$this.setTitle(nav.title);
 					});
 				};
 				
@@ -941,7 +993,7 @@
 					navdom = $("#" + this._navPrefix + q);
 				} else {
 					var nav = this._getNav(q);
-					//this.curNav = nav;
+					this.curNav = nav;
 					navdom = $("#" + this._navPrefix + nav.id);
 				}
 				
@@ -993,22 +1045,22 @@
 						if(complete) complete();
 					});
 				},
-				prePos = function(curValue){
-					var oldValue = $to[0].style.webkitTransform,
-						curValue = createTransform(curValue);
-					//because everytime animation completed the to page's transition,tranfrom property
-					//are reset to none,so here what we need to check is if the to page's position has
-					//be in place that animation need it to be,if it is then start anmiation when from page's
-					//inialization has completed,else start anmiation when to page initializaiton has completed
-					if(curValue == oldValue){
-					//if the direction is reverse then start animation after from page initialization
-						transitionComplete($from,already);
-					}else{
-						transitionComplete($to,already);
-					}
+				// prePos = function(curValue){
+				// 	var oldValue = $to[0].style.webkitTransform,
+				// 		curValue = createTransform(curValue);
+				// 	//because everytime animation completed the to page's transition,tranfrom property
+				// 	//are reset to none,so here what we need to check is if the to page's position has
+				// 	//be in place that animation need it to be,if it is then start anmiation when from page's
+				// 	//inialization has completed,else start anmiation when to page initializaiton has completed
+				// 	if(curValue == oldValue){
+				// 	//if the direction is reverse then start animation after from page initialization
+				// 		transitionComplete($from,already);
+				// 	}else{
+				// 		transitionComplete($to,already);
+				// 	}
 
-					$to.css('-webkit-transform',curValue);
-				},
+				// 	$to.css('-webkit-transform',curValue);
+				// },
 
 				prepare = function () {
 					//init to page,because of the javascript's one thread excuting,
@@ -1026,16 +1078,18 @@
 						//so need to check if the animation starts when the from or page is aleady
 						//var oldValue = $to[0].style.webkitTransform;
 						if(reverse){
-							prePos('-100%')
+							$to.css('-webkit-transform',createTransform('-100%'));
 						}else{
-							prePos('100%');
+							$to.css('-webkit-transform',createTransform('100%'));
 						}
 
 						$from.css('-webkit-transform',createTransform('0%'));
 						//go to already step as soon as possible
-						$from.css('-webkit-transition','-webkit-transform .1ms linear');
+						$from.css('-webkit-transition','-webkit-transform 0s linear');
 
-						$to.css('-webkit-transition','-webkit-transform .1ms linear');
+						$to.css('-webkit-transition','-webkit-transform 0s linear');
+
+						window.setTimeout(function(){already();},0);
 					}
 					else{
 						already();
@@ -1046,13 +1100,14 @@
 					$to.css('opacity',1);
 					$to.css( 'z-index', '' );
 
+					startOut();
+					startIn();
+
 					if(!none && $from){
 						$from.css('-webkit-transition','-webkit-transform 350ms ease-out');
 
 						$to.css('-webkit-transition','-webkit-transform 350ms ease-out');
 					}
-					startOut();
-					startIn();
 				},
 				startOut = function() {
 					//$to.css( "z-index", '1' );
@@ -1068,7 +1123,7 @@
 
 				cleanFrom = function() {
 					$from.removeClass( $.mobile.activePageClass);//.height( '' );
-					$from.css('-webkit-transition','none');	
+					//$from.css('-webkit-transition','none');	
 				},
 
 				startIn = function() {
@@ -1202,27 +1257,37 @@
 						if(this.currentIndex==1)
 							grid.empty();
 
-						function itemclick (item,grid,data) {
-							// item.click(function () {
-							// 	var old = $this.selectedItem.item;
-							// 	if(old){
-							// 		old.removeClass('ui-btn-active');
-							// 	}
-							// 	item.addClass('ui-btn-active');
-
-							// 	$this.selectedItem.item = item;
-							// 	$this.selectedItem.data = data;
+						//var tracker = utility.createTimeTracker();
+						function itemclick (item,grid,data,url) {
+							// item.bind('tap',function(){logger.logInfo('tap click time:',tracker.getInterval());
 							// });
-							item.bind('tap',function(){
+							// item.bind('vmousedown',function(){
+							// 	logger.logInfo('time tracker started');
+
+							// 	tracker.start();
+							// 	logger.logInfo('mouse down time:',tracker.getInterval());});
+							// item.bind('vmouseup',function(){logger.logInfo('mouse up time:',tracker.getInterval());});
+
+							item.bind('vclick',function(){
+								//logger.logInfo('vclick time:',tracker.getInterval());
+								
+								item.addClass('ui-btn-active');
+
 								var old = $this.selectedItem.item;
 								if(old){
 									old.removeClass('ui-btn-active');
 								}
-								item.addClass('ui-btn-active');
+
+								$.mobile.changePage(url);
 
 								$this.selectedItem.item = item;
 								$this.selectedItem.data = data;
 							});
+							// item.bind('click',function(){
+							// 	logger.logInfo('click time:',tracker.getInterval());
+							// 	tracker.finish();
+							// 	logger.logInfo('time tracker finished');
+							// });
 						}
 						
 						for (var index=0;index<data.length;index++) {
@@ -1233,16 +1298,17 @@
 								imgUrl = newItem.image.path;
 								//key = "news_item_"+(index+1)*$this.currentIndex;
 							
-							var item = $("<li><a href='" + this.options.linkUrl + "'>"+
-										"<img class='cs-img' style='margin:1em 10px;' width='80px' height='60px' cs-baseUrl='"+baseUrl+"' cs-url='"+imgUrl+"' />"+
-										"<h6>" + newItem.titleNews + "</h6><p>"+newItem.descNews+"</p>"+
-										"<div style='display:inline;'><p style='max-width:100px;text-overflow:ellipsis;float:left;'>" + newItem.from + 
-										"</p><p style='float:right'>"+newItem.time+"</p></div></a></li>");
+							var item = $("<li data-theme='c' class='ui-btn ui-btn-icon-right ui-li-has-arrow'>"+
+										"<img class='cs-img' style='margin:0.6em 10px' width='80px' height='60px' cs-baseUrl='"+baseUrl+"' cs-url='"+imgUrl+"' />"+
+										"<h6 style='margin:0em 0 0.6em 0'>" + newItem.titleNews + "</h6><p>"+newItem.descNews+"</p>"+
+										"<div><p style='max-width:100px;text-overflow:ellipsis;float:left;'>" + newItem.from + 
+										"</p><p style='float:right'>"+newItem.time+"</p></div>"+
+										"<span style='position:absolute;top:50%;margin-top:-9px;background-position:-108px 50%' class='ui-icon ui-icon-arrow-r ui-icon-shadow'>&nbsp;</span></li>");
 
 							var img = item.find('img');
 							utility.loadImg(img[0],dPath);
 
-							itemclick(item,grid,newItem);
+							itemclick(item,grid,newItem,this.options.linkUrl);
 
 							grid.append(item);
 						}
@@ -1274,7 +1340,7 @@
 									var db = database.getdb("news");
 
 									logger.logInfo('get news db:',db);
-									logger.logInfo('begin adding news:',news,' to db: ')
+									logger.logInfo('begin adding news count:',news.length,' to db: ')
 									
 									db.add("NEWS", {
 										primary : "id",
@@ -1284,9 +1350,6 @@
 											}
 										],
 										onComplete : function (ar) {
-											if (ar.length) {
-												logger.logInfo("add the " + ar[0] + "data to news db");
-											}
 											logger.logInfo('finish adding data to news');
 										},
 										onerror:function(err){
@@ -1327,7 +1390,7 @@
 							},
 							fields : ["data"],
 							onComplete : function (data) {
-								logger.logInfo('finish getting data from db: ',data);
+								logger.logInfo('finish getting data from db data count : ',data.length);
 
 								if (data.length) {
 									$this._render(data[0].data);
@@ -1392,6 +1455,8 @@
 			//refresh the datagrid
 			var refNews = function (options) {
 				var grid = $("#news_ul").data("datagrid");
+
+				mex.shell.setTitle(mex.shell.curNav.title);
 
 				if (grid) {
 					grid.reset();
@@ -1537,6 +1602,7 @@
 						data : {
 							codeType : codeType
 						},
+						caching:false,
 						linkUrl : "detail.html",
 						dataType : "jsonp"
 						// error:function (state,error) {
@@ -1555,11 +1621,13 @@
 				mex.shell.onNav(refNews);	
 			};
 
-			$('#news_page').live('pagebeforecreate',function e() {
+			$('#news_page').live('pagebeforecreate',function (e) {
 				if (!mex.shell.hasNav()) addNavs();
 			});
 
-			$("#news_page").live("pageshow", function (event) {
+			$("#news_page").live("pageshow", function (e) {
+				$(e.target).attr('title',mex.shell.curNav.title);
+
 				if(self.grid)
 					return;
 				
@@ -1658,8 +1726,6 @@
 							var news = data.jsonp.data.data.news,
 										imgs = data.jsonp.data.data.imgList,
 										content = $('#detail_info');
-
-							logger.logInfo('data:',data);	
 
 							if(imgs&&imgs.length){
 								var imgsContainer = $('<div></div>');
