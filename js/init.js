@@ -469,7 +469,7 @@
 		exports.isTouchPad = function(){
 			return (/hp-tablet/gi).test(navigator.appVersion);
 		};
-		exports.loadImg = function (img,defaultUrl) {
+		exports.loadImg = function (img,options) {
 			var fullUrl = img.getAttribute('cs-src'),
 			baseUrl = img.getAttribute('cs-baseUrl'),
 			url = img.getAttribute('cs-url'),
@@ -483,6 +483,11 @@
 			if(!fullUrl) targetUrl = baseUrl+url;
 
 			function onload () {
+				if(options.width) img.style.width = options.width;
+				if(options.height) img.style.height = options.height;
+
+				if(options.loading) options.loading();
+
 				if(fullUrl){
 					img.src = fullUrl;
 				}else if(url){
@@ -493,7 +498,7 @@
 			}
 
 			function onerror () {
-				img.src = defaultUrl;
+				img.src = options.defaultUrl;
 
 				img.removeEventListener('error',onerror);
 			}
@@ -501,7 +506,7 @@
 			img.addEventListener('load',onload,false);
 			img.addEventListener('error',onerror,false);
 
-			img.src = defaultUrl;
+			img.src = options.defaultUrl;
 
 		};
 		exports.createTimeTracker = function(){
@@ -1045,22 +1050,6 @@
 						if(complete) complete();
 					});
 				},
-				// prePos = function(curValue){
-				// 	var oldValue = $to[0].style.webkitTransform,
-				// 		curValue = createTransform(curValue);
-				// 	//because everytime animation completed the to page's transition,tranfrom property
-				// 	//are reset to none,so here what we need to check is if the to page's position has
-				// 	//be in place that animation need it to be,if it is then start anmiation when from page's
-				// 	//inialization has completed,else start anmiation when to page initializaiton has completed
-				// 	if(curValue == oldValue){
-				// 	//if the direction is reverse then start animation after from page initialization
-				// 		transitionComplete($from,already);
-				// 	}else{
-				// 		transitionComplete($to,already);
-				// 	}
-
-				// 	$to.css('-webkit-transform',curValue);
-				// },
 
 				prepare = function () {
 					//init to page,because of the javascript's one thread excuting,
@@ -1084,11 +1073,11 @@
 						}
 
 						$from.css('-webkit-transform',createTransform('0%'));
-						//go to already step as soon as possible
+						
 						$from.css('-webkit-transition','-webkit-transform 0s linear');
 
 						$to.css('-webkit-transition','-webkit-transform 0s linear');
-
+						//go to already step as soon as possible
 						window.setTimeout(function(){already();},0);
 					}
 					else{
@@ -1110,7 +1099,6 @@
 					}
 				},
 				startOut = function() {
-					//$to.css( "z-index", '1' );
 					if(none || !$from)
 						return;
 
@@ -1123,7 +1111,6 @@
 
 				cleanFrom = function() {
 					$from.removeClass( $.mobile.activePageClass);//.height( '' );
-					//$from.css('-webkit-transition','none');	
 				},
 
 				startIn = function() {
@@ -1306,7 +1293,7 @@
 										"<span style='position:absolute;top:50%;margin-top:-9px;background-position:-108px 50%' class='ui-icon ui-icon-arrow-r ui-icon-shadow'>&nbsp;</span></li>");
 
 							var img = item.find('img');
-							utility.loadImg(img[0],dPath);
+							utility.loadImg(img[0],{defaultUrl:dPath});
 
 							itemclick(item,grid,newItem,this.options.linkUrl);
 
@@ -1589,8 +1576,6 @@
 				} else {
 					createScroller();
 				}
-
-				//self.scroller.scrollTo(0,self.topOffset,0,null);
 			}
 
 			var initNews = function () {
@@ -1605,12 +1590,7 @@
 						caching:false,
 						linkUrl : "detail.html",
 						dataType : "jsonp"
-						// error:function (state,error) {
-						// 	$('#news_error').html("state:"+state+"</br>Error:"+error);
-						// 	$('#news_pop').popup('open');
 
-						// 	mex.shell.hideLoading();
-						// }
 					});
 				
 				self.grid = grid;
@@ -1678,8 +1658,6 @@
 					page = $('#detail_page');
 
 				page.attr('title',title);
-				//page.title = title;
-				//$(page).attr('data-title', title);
 				
 				var author = current.author || "",
 				time = current.time || "";
@@ -1693,17 +1671,25 @@
 			function showImg (img,url,width,height) {
 				img.click(function () {
 					var pop = $('#detail_pop'),
-						img = $("<img src='"+url+"' width='"+width+"' height='"+height+"' />");
+						pimg = $("<img cs-src='"+url+"' width='"+width+"' height='"+height+"' />");
 
-					//pop.popup();
+					utility.loadImg(pimg[0],
+						{	defaultUrl:'css/images/default.png',
+							width:width,
+							height:height,
+							loading:function(){
+								pop.css('display','');
+								pop.popup('open',{positionTo:$('#detail_content'),transition:'pop'});
+							}
+						});
 
-					img.bind('load',function () {
-						pop.css('display','');
+					pop.append(pimg);
 
-						pop.popup('open',{positionTo:$('#detail_content'),transition:'pop'});
-					});
-					
-					pop.append(img);
+					// img.bind('load',function () {
+					// 	pop.css('display','');
+
+					// 	pop.popup('open',{positionTo:$('#detail_content'),transition:'pop'});
+					// });
 				});
 			}
 
@@ -1735,7 +1721,7 @@
 										$img = $("<img style='float:right;clear:right;margin:2px;' "+
 											"width=80 height=70 cs-baseUrl='"+baseUrl+"' cs-url='"+img.path+"' />");
 
-									utility.loadImg($img[0],'css/images/default.png');
+									utility.loadImg($img[0],{defaultUrl:'css/images/default.png'});
 
 									imgsContainer.append($img);
 
